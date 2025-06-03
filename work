@@ -1,0 +1,31 @@
+#!/bin/bash
+
+SHOULD_KILL=true
+MAX_DEPTH=3
+
+while [[ "$#" -gt 0 ]]; do
+	case "$1" in
+		--nk) SHOULD_KILL=false ;;
+		--depth)
+		  shift
+		  MAX_DEPTH="$1"
+		  ;;
+		*) echo "Unknown parameter: $1" >&2; exit 1;;
+	esac
+	shift
+done
+
+
+if [[ "$1" == "--nk" ]]; then
+	SHOULD_KILL=false
+fi
+
+
+DIR=$(find ~/coding -maxdepth "$MAX_DEPTH" -type d | fzf)
+[ -z "$DIR" ] && exit 1
+
+code "$DIR" &
+
+if $SHOULD_KILL; then
+	hyprctl dispatch killwindow class:kitty 
+fi
